@@ -1,0 +1,17 @@
+{
+  "name": "timezone-app",
+  "version": "1.0.0",
+  "description": "Super clean timezone app for checking Poland, Calgary, and Florida times",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 3000",
+    "dev": "python3 -m http.server 3000"
+  },
+  "keywords": ["timezone", "time", "clock", "web-app", "minimal"],
+  "author": "Yaosamo (Yaroslav Samoylov)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yaosamo/timezone-app.git"
+  }
+}

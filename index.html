@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Zones - Simple & Clean</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 3rem;
+            opacity: 0.95;
+        }
+        
+        .time-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .time-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .time-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-5px);
+        }
+        
+        .time-card.current {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+        }
+        
+        .location {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+        
+        .time {
+            font-size: 3rem;
+            font-weight: 200;
+            margin-bottom: 0.5rem;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .date {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-bottom: 0.5rem;
+        }
+        
+        .timezone {
+            font-size: 0.8rem;
+            opacity: 0.6;
+        }
+        
+        .control-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 2rem;
+        }
+        
+        .time-input {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .time-input label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .time-input input {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 0.8rem 1rem;
+            color: white;
+            font-size: 1.1rem;
+            text-align: center;
+            min-width: 80px;
+        }
+        
+        .time-input input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            padding: 0.8rem 2rem;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .footer {
+            margin-top: 3rem;
+            opacity: 0.6;
+            font-size: 0.8rem;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 2rem;
+            }
+            
+            .time {
+                font-size: 2.5rem;
+            }
+            
+            .time-input {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Time Zones</h1>
+        
+        <div class="control-panel">
+            <div class="time-input">
+                <label>If it's</label>
+                <input type="time" id="timeInput" value="10:00">
+                <label>in Portland, then...</label>
+            </div>
+            <div class="buttons">
+                <button onclick="setCurrentTime()">Use Current Time</button>
+                <button onclick="setTime('09:00')">9:00 AM</button>
+                <button onclick="setTime('12:00')">12:00 PM</button>
+                <button onclick="setTime('17:00')">5:00 PM</button>
+            </div>
+        </div>
+        
+        <div class="time-grid">
+            <div class="time-card current" id="portland">
+                <div class="location">Portland, OR</div>
+                <div class="time" id="portland-time">10:00 AM</div>
+                <div class="date" id="portland-date">Friday, Feb 13</div>
+                <div class="timezone">PST (UTC-8)</div>
+            </div>
+            
+            <div class="time-card" id="poland">
+                <div class="location">Poland</div>
+                <div class="time" id="poland-time">7:00 PM</div>
+                <div class="date" id="poland-date">Friday, Feb 13</div>
+                <div class="timezone">CET (UTC+1)</div>
+            </div>
+            
+            <div class="time-card" id="calgary">
+                <div class="location">Calgary, Canada</div>
+                <div class="time" id="calgary-time">11:00 AM</div>
+                <div class="date" id="calgary-date">Friday, Feb 13</div>
+                <div class="timezone">MST (UTC-7)</div>
+            </div>
+            
+            <div class="time-card" id="florida">
+                <div class="location">Florida</div>
+                <div class="time" id="florida-time">1:00 PM</div>
+                <div class="date" id="florida-date">Friday, Feb 13</div>
+                <div class="timezone">EST (UTC-5)</div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            Built with ❤️ by Yaosamo
+        </div>
+    </div>
+    
+    <script>
+        const timezones = {
+            portland: 'America/Los_Angeles',
+            poland: 'Europe/Warsaw', 
+            calgary: 'America/Edmonton',
+            florida: 'America/New_York'
+        };
+        
+        function updateTimes() {
+            const timeInput = document.getElementById('timeInput').value;
+            const [hours, minutes] = timeInput.split(':').map(Number);
+            
+            // Create a date object for today with the specified time in Portland timezone
+            const now = new Date();
+            const portland = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+            
+            Object.entries(timezones).forEach(([location, timezone]) => {
+                const timeElement = document.getElementById(`${location}-time`);
+                const dateElement = document.getElementById(`${location}-date`);
+                
+                if (location === 'portland') {
+                    // For Portland, use the input time directly
+                    const localTime = portland.toLocaleTimeString('en-US', {
+                        timeZone: timezone,
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                    });
+                    
+                    const localDate = portland.toLocaleDateString('en-US', {
+                        timeZone: timezone,
+                        weekday: 'long',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                    
+                    timeElement.textContent = localTime;
+                    dateElement.textContent = localDate;
+                } else {
+                    // For other locations, convert from Portland time
+                    const utcTime = portland.getTime() + (portland.getTimezoneOffset() * 60000);
+                    const portlandOffset = -8; // PST is UTC-8
+                    const portlandUtc = new Date(utcTime + (portlandOffset * 3600000));
+                    
+                    const localTime = portlandUtc.toLocaleTimeString('en-US', {
+                        timeZone: timezone,
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                    });
+                    
+                    const localDate = portlandUtc.toLocaleDateString('en-US', {
+                        timeZone: timezone,
+                        weekday: 'long', 
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                    
+                    timeElement.textContent = localTime;
+                    dateElement.textContent = localDate;
+                }
+            });
+        }
+        
+        function setCurrentTime() {
+            const now = new Date();
+            const currentTime = now.toTimeString().substr(0,5);
+            document.getElementById('timeInput').value = currentTime;
+            updateTimes();
+        }
+        
+        function setTime(time) {
+            document.getElementById('timeInput').value = time;
+            updateTimes();
+        }
+        
+        // Initialize with current time
+        setCurrentTime();
+        
+        // Update when time input changes
+        document.getElementById('timeInput').addEventListener('input', updateTimes);
+        
+        // Update every minute
+        setInterval(updateTimes, 60000);
+    </script>
+</body>
+</html>
