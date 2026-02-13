@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Quick timezone converter for Portland, Poland, Calgary, and Florida">
     <title>Time Zones - Simple & Clean</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕐</text></svg>">
     <style>
         * {
             margin: 0;
@@ -46,6 +48,7 @@
         .time-card {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-radius: 20px;
             padding: 2rem;
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -60,6 +63,18 @@
         .time-card.current {
             background: rgba(255, 255, 255, 0.2);
             border: 2px solid rgba(255, 255, 255, 0.4);
+        }
+        
+        .time-card .badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 0.2rem 0.8rem;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.8rem;
+            opacity: 0.8;
         }
         
         .location {
@@ -87,9 +102,21 @@
             opacity: 0.6;
         }
         
+        .day-indicator {
+            font-size: 0.75rem;
+            opacity: 0.6;
+            margin-top: 0.3rem;
+        }
+        
+        .day-indicator.different-day {
+            opacity: 0.9;
+            color: #ffd54f;
+        }
+        
         .control-panel {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-radius: 15px;
             padding: 2rem;
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -110,7 +137,7 @@
             opacity: 0.9;
         }
         
-        .time-input input {
+        .time-input input[type="time"] {
             background: rgba(255, 255, 255, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 8px;
@@ -119,6 +146,14 @@
             font-size: 1.1rem;
             text-align: center;
             min-width: 80px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            color-scheme: dark;
+        }
+        
+        .time-input input[type="time"]:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
         }
         
         .time-input input::placeholder {
@@ -148,6 +183,15 @@
             transform: translateY(-2px);
         }
         
+        button:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
         .footer {
             margin-top: 3rem;
             opacity: 0.6;
@@ -164,6 +208,27 @@
                 font-size: 2.5rem;
             }
             
+            .time-grid {
+                gap: 1rem;
+            }
+            
+            .time-card {
+                padding: 1.5rem;
+            }
+            
+            .control-panel {
+                padding: 1.5rem;
+            }
+            
+            .buttons {
+                gap: 0.5rem;
+            }
+            
+            button {
+                padding: 0.7rem 1.4rem;
+                font-size: 0.85rem;
+            }
+            
             .time-input {
                 flex-direction: column;
                 text-align: center;
@@ -172,50 +237,54 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" role="main">
         <h1>Time Zones</h1>
         
-        <div class="control-panel">
+        <div class="control-panel" aria-label="Time input controls">
             <div class="time-input">
-                <label>If it's</label>
-                <input type="time" id="timeInput" value="10:00">
-                <label>in Portland, then...</label>
+                <label for="timeInput">If it's</label>
+                <input type="time" id="timeInput" value="10:00" aria-label="Set time in Portland">
+                <label>in Portland, then…</label>
             </div>
-            <div class="buttons">
-                <button onclick="setCurrentTime()">Use Current Time</button>
-                <button onclick="setTime('09:00')">9:00 AM</button>
-                <button onclick="setTime('12:00')">12:00 PM</button>
-                <button onclick="setTime('17:00')">5:00 PM</button>
+            <div class="buttons" role="group" aria-label="Quick time presets">
+                <button type="button" onclick="setCurrentTime()">Use Current Time</button>
+                <button type="button" onclick="setTime('09:00')">9:00 AM</button>
+                <button type="button" onclick="setTime('12:00')">12:00 PM</button>
+                <button type="button" onclick="setTime('17:00')">5:00 PM</button>
             </div>
         </div>
         
-        <div class="time-grid">
-            <div class="time-card current" id="portland">
+        <div class="time-grid" aria-live="polite">
+            <div class="time-card current" id="portland" role="region" aria-label="Portland time">
+                <div class="badge">Your city</div>
                 <div class="location">Portland, OR</div>
                 <div class="time" id="portland-time">10:00 AM</div>
                 <div class="date" id="portland-date">Friday, Feb 13</div>
-                <div class="timezone">PST (UTC-8)</div>
+                <div class="timezone" id="portland-tz">PST (UTC-8)</div>
             </div>
             
-            <div class="time-card" id="poland">
+            <div class="time-card" id="poland" role="region" aria-label="Poland time">
                 <div class="location">Poland</div>
                 <div class="time" id="poland-time">7:00 PM</div>
                 <div class="date" id="poland-date">Friday, Feb 13</div>
-                <div class="timezone">CET (UTC+1)</div>
+                <div class="timezone" id="poland-tz">CET (UTC+1)</div>
+                <div class="day-indicator" id="poland-day"></div>
             </div>
             
-            <div class="time-card" id="calgary">
+            <div class="time-card" id="calgary" role="region" aria-label="Calgary time">
                 <div class="location">Calgary, Canada</div>
                 <div class="time" id="calgary-time">11:00 AM</div>
                 <div class="date" id="calgary-date">Friday, Feb 13</div>
-                <div class="timezone">MST (UTC-7)</div>
+                <div class="timezone" id="calgary-tz">MST (UTC-7)</div>
+                <div class="day-indicator" id="calgary-day"></div>
             </div>
             
-            <div class="time-card" id="florida">
+            <div class="time-card" id="florida" role="region" aria-label="Florida time">
                 <div class="location">Florida</div>
                 <div class="time" id="florida-time">1:00 PM</div>
                 <div class="date" id="florida-date">Friday, Feb 13</div>
-                <div class="timezone">EST (UTC-5)</div>
+                <div class="timezone" id="florida-tz">EST (UTC-5)</div>
+                <div class="day-indicator" id="florida-day"></div>
             </div>
         </div>
         
@@ -232,66 +301,113 @@
             florida: 'America/New_York'
         };
         
+        /**
+         * Get the UTC offset in hours for a timezone at a specific instant.
+         * Uses Intl to handle DST correctly.
+         */
+        function getUtcOffsetHours(timezone, date) {
+            const utcStr = date.toLocaleString('en-US', { timeZone: 'UTC' });
+            const tzStr = date.toLocaleString('en-US', { timeZone: timezone });
+            const utcDate = new Date(utcStr);
+            const tzDate = new Date(tzStr);
+            return (tzDate - utcDate) / 3600000;
+        }
+        
+        /**
+         * Get the short timezone abbreviation (e.g., PST, PDT, CET, CEST).
+         */
+        function getTzAbbreviation(timezone, date) {
+            const parts = new Intl.DateTimeFormat('en-US', {
+                timeZone: timezone,
+                timeZoneName: 'short'
+            }).formatToParts(date);
+            const tzPart = parts.find(p => p.type === 'timeZoneName');
+            return tzPart ? tzPart.value : '';
+        }
+        
         function updateTimes() {
             const timeInput = document.getElementById('timeInput').value;
+            if (!timeInput) return;
+            
             const [hours, minutes] = timeInput.split(':').map(Number);
             
-            // Create a date object for today with the specified time in Portland timezone
+            // Use today's date as base
             const now = new Date();
-            const portland = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+            
+            // Figure out Portland's current UTC offset (handles DST automatically)
+            const portlandOffsetHours = getUtcOffsetHours('America/Los_Angeles', now);
+            
+            // Build UTC timestamp: the user wants this time IN PORTLAND
+            // So UTC = desired_portland_time - portland_offset
+            const utcDate = new Date(Date.UTC(
+                now.getFullYear(), now.getMonth(), now.getDate(),
+                hours - portlandOffsetHours, minutes
+            ));
+            
+            // Get Portland's date string for "same day" comparison
+            const portlandDateStr = utcDate.toLocaleDateString('en-US', {
+                timeZone: 'America/Los_Angeles',
+                year: 'numeric', month: '2-digit', day: '2-digit'
+            });
             
             Object.entries(timezones).forEach(([location, timezone]) => {
                 const timeElement = document.getElementById(`${location}-time`);
                 const dateElement = document.getElementById(`${location}-date`);
+                const tzElement = document.getElementById(`${location}-tz`);
+                const dayElement = document.getElementById(`${location}-day`);
                 
-                if (location === 'portland') {
-                    // For Portland, use the input time directly
-                    const localTime = portland.toLocaleTimeString('en-US', {
+                const localTime = utcDate.toLocaleTimeString('en-US', {
+                    timeZone: timezone,
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                });
+                
+                const localDate = utcDate.toLocaleDateString('en-US', {
+                    timeZone: timezone,
+                    weekday: 'long',
+                    month: 'short',
+                    day: 'numeric'
+                });
+                
+                // Dynamic timezone abbreviation & offset
+                const abbrev = getTzAbbreviation(timezone, utcDate);
+                const offset = getUtcOffsetHours(timezone, utcDate);
+                const offsetStr = offset >= 0 ? `UTC+${offset}` : `UTC${offset}`;
+                tzElement.textContent = `${abbrev} (${offsetStr})`;
+                
+                timeElement.textContent = localTime;
+                dateElement.textContent = localDate;
+                
+                // Show "next day" / "previous day" indicator for non-Portland cards
+                if (dayElement) {
+                    const thieDateStr = utcDate.toLocaleDateString('en-US', {
                         timeZone: timezone,
-                        hour: 'numeric',
-                        minute: '2-digit',
-                        hour12: true
+                        year: 'numeric', month: '2-digit', day: '2-digit'
                     });
-                    
-                    const localDate = portland.toLocaleDateString('en-US', {
-                        timeZone: timezone,
-                        weekday: 'long',
-                        month: 'short',
-                        day: 'numeric'
-                    });
-                    
-                    timeElement.textContent = localTime;
-                    dateElement.textContent = localDate;
-                } else {
-                    // For other locations, convert from Portland time
-                    const utcTime = portland.getTime() + (portland.getTimezoneOffset() * 60000);
-                    const portlandOffset = -8; // PST is UTC-8
-                    const portlandUtc = new Date(utcTime + (portlandOffset * 3600000));
-                    
-                    const localTime = portlandUtc.toLocaleTimeString('en-US', {
-                        timeZone: timezone,
-                        hour: 'numeric',
-                        minute: '2-digit',
-                        hour12: true
-                    });
-                    
-                    const localDate = portlandUtc.toLocaleDateString('en-US', {
-                        timeZone: timezone,
-                        weekday: 'long', 
-                        month: 'short',
-                        day: 'numeric'
-                    });
-                    
-                    timeElement.textContent = localTime;
-                    dateElement.textContent = localDate;
+                    if (thieDateStr !== portlandDateStr) {
+                        dayElement.textContent = thieDateStr > portlandDateStr ? '+1 day' : '−1 day';
+                        dayElement.classList.add('different-day');
+                    } else {
+                        dayElement.textContent = 'Same day';
+                        dayElement.classList.remove('different-day');
+                    }
                 }
             });
         }
         
         function setCurrentTime() {
             const now = new Date();
-            const currentTime = now.toTimeString().substr(0,5);
-            document.getElementById('timeInput').value = currentTime;
+            // Get current time in Portland, not the user's local time
+            const portlandHours = parseInt(now.toLocaleString('en-US', {
+                timeZone: 'America/Los_Angeles', hour: '2-digit', hour12: false
+            }));
+            const portlandMinutes = parseInt(now.toLocaleString('en-US', {
+                timeZone: 'America/Los_Angeles', minute: '2-digit'
+            }));
+            const h = String(portlandHours).padStart(2, '0');
+            const m = String(portlandMinutes).padStart(2, '0');
+            document.getElementById('timeInput').value = `${h}:${m}`;
             updateTimes();
         }
         
@@ -300,14 +416,14 @@
             updateTimes();
         }
         
-        // Initialize with current time
+        // Initialize with current Portland time
         setCurrentTime();
         
         // Update when time input changes
         document.getElementById('timeInput').addEventListener('input', updateTimes);
         
-        // Update every minute
-        setInterval(updateTimes, 60000);
+        // Update every minute to keep "current time" fresh if user hasn't touched input
+        setInterval(() => updateTimes(), 60000);
     </script>
 </body>
 </html>
